@@ -1,0 +1,11 @@
+const BaseIndex = require("../../base/BaseIndex");
+
+const Index = BaseIndex.extend({
+    construct : function(){
+        this.super.construct();
+        console.log('middleware',Object.keys(this.theConfig).length)
+        console.log('vamdfkvmfdv',this.theConfig);
+    }
+})
+
+module.exports = (Index.create()).index();

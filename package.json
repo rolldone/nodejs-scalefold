@@ -1,0 +1,53 @@
+{
+  "_moduleAliases": {
+    "@root": ".",
+    "BaseObject": "base/BaseObject.js",
+    "BaseIndex": "Base/BaseIndex.js",
+    "@middleware": "app/middleware",
+    "@tool": "tool",
+    "@app": "app",
+    "@controller": "app/controllers",
+    "@service": "app/services",
+    "@route": "routes",
+    "@config": "config",
+    "@model": "models",
+    "@notification": "app/notifications",
+    "@view": "resources/v1"
+  },
+  "name": "scaffold_nodejs",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "sequelize-init": "sequelize init"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "asyncjs": "0.0.13",
+    "bcrypt": "^5.0.0",
+    "body-parser": "^1.19.0",
+    "connect-redis": "^5.0.0",
+    "cookie-parser": "^1.4.5",
+    "cors": "^2.8.5",
+    "dot-env": "0.0.1",
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1",
+    "express-session": "^1.17.1",
+    "jsonwebtoken": "^8.5.1",
+    "lodash": "^4.17.19",
+    "module-alias": "^2.2.2",
+    "moment": "^2.27.0",
+    "moment-timezone": "^0.5.31",
+    "mysql2": "^2.1.0",
+    "named-routes": "^2.0.7",
+    "node-redis-pubsub": "^4.0.0",
+    "nunjucks": "^3.2.1",
+    "redis": "^3.0.2",
+    "sequelize": "^6.3.2",
+    "serialize-error": "^7.0.1",
+    "uberproto": "^2.0.6",
+    "validatorjs": "^3.18.1"
+  }
+}
