@@ -24,7 +24,7 @@ module.exports = BaseService.extend({
           });
           return resData;
         case Validator.fails:
-          throw new Error(JSON.stringify(validator.errors.all()));
+          throw new CustomError("error.validation",JSON.stringify(validator.errors.all()));
       }
     }catch(ex){
       throw ex;
@@ -44,7 +44,7 @@ module.exports = BaseService.extend({
             token : token
           })
         case validator.fails:
-          throw new Error(JSON.stringify(validator.errors.all()));
+          throw new CustomError("error.validation",JSON.stringify(validator.errors.all()));
       }
     }catch(ex){
       throw ex;
@@ -62,7 +62,7 @@ module.exports = BaseService.extend({
           });
           return resData;
         case validator.fails:
-          throw new Error(JSON.stringify(validator.errors.all()));
+          throw new CustomError("error.validation",JSON.stringify(validator.errors.all()));
       }
     }catch(ex){
       throw ex;
@@ -83,7 +83,7 @@ module.exports = BaseService.extend({
           let resData = await device.save(props);
           return resData;
         case validator.fails:
-          throw new Error(JSON.stringify(validator.errors.all()));
+          throw new CustomError("error.validation",JSON.stringify(validator.errors.all()));
       }
     }catch(ex){
       throw ex;
@@ -101,7 +101,7 @@ module.exports = BaseService.extend({
           let resData = await device.update(props);
           return resData;
         case validator.fails:
-          throw new Error(JSON.stringify(validator.errors.all()));
+          throw new CustomError("error.validation",JSON.stringify(validator.errors.all()));
       }
     }catch(ex){
       throw ex;
@@ -126,7 +126,7 @@ module.exports = BaseService.extend({
           });
           return resData;
         case validator.fails:
-          throw new Error(JSON.stringify(validator.errors.all()));
+          throw new CustomError("error.validation",JSON.stringify(validator.errors.all()));
       }
     }catch(ex){
       throw ex;

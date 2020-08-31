@@ -1,5 +1,6 @@
 const { App, Cors, BodyParser, Express, Path, Cookie, Session, Env, Redis, RedisStore } = require('@tool');
-
+var multer = require('multer');
+var upload = multer();
 module.exports = async function(callback){
   App.use(Cors());
   // app.set("views", path.join(__dirname, "../", "views"));
@@ -7,10 +8,20 @@ module.exports = async function(callback){
   App.set("view engine", "html");
   //static files
   App.use("/public", Express.static(Path.join(__dirname, '../', "public")));
+  App.use("/ractive", Express.static(Path.join(__dirname, '../', "resources/views")));
+  // App.use("/public", Express.static(Path.join(__dirname, '../', "resources/views")));
+
+  /* Request Type  */
+  /* application/json */
   App.use(BodyParser.json());
+  /* application-x-www-form-urlencoded */
   App.use(BodyParser.urlencoded({
-    extended: false
+    extended: true
   }));
+  /* Multipart/form-data */
+  App.use(upload.array());
+  /* ---------------------------------- */
+  
   App.use(Cookie());
   /* Create redis client */
   const redisClient = Redis.createClient({
@@ -31,5 +42,6 @@ module.exports = async function(callback){
     sess.cookie.secure = true // serve secure cookies
   }
   App.use(Session(sess));
-  return callback(null);
+  console.log('cabback',callback);
+  return null;
 }

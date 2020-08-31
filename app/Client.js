@@ -1,5 +1,6 @@
 const BaseApp = require("./BaseApp");
-const Client = require('@model/client.js');
+const {Client} = require('@model');
 module.exports = BaseApp.extend({
-  model : Client
+  model : Client,
+  excludes : ['password','remember_token']
 })

@@ -1,6 +1,7 @@
 const Proto = require('uberproto');
 const { JsonWebToken, Bcrypt } = require('@tool'); 
 const config = require('@config');
+const { Lodash } = require('../../tool');
 const saltRounds = 10;
 
 module.exports = Proto.extend({
@@ -22,23 +23,23 @@ module.exports = Proto.extend({
       resolve(formattedTime);
     });
   },
-  generatePassword : function(val, error) {
-    return new Promise(function(resolve) {
+  generatePassword : function(val) {
+    return new Promise(function(resolve,reject) {
       Bcrypt.hash(val, saltRounds).then(function(hash) {
         // Store hash in your password DB.
         resolve(hash);
       }).catch(function(err) {
-        error(err);
+        reject(err);
       });
     })
   },
-  checkPassword : function(val, val2, error) {
+  checkPassword : function(val, val2) {
     return new Promise(function(resolve) {
       Bcrypt.compare(val, val2).then(function(res) {
         if (res == true) {
           return resolve(true);
         }
-        error(false);
+        resolve(false);
       });
     });
   },
@@ -51,15 +52,15 @@ module.exports = Proto.extend({
   // Jika menggunakan header autorization barrier
   // --------------------------------------------
   splitToken : function(token) {
-    if (_.includes(token, 'Bearer')) {
+    if (Lodash.includes(token, 'Bearer')) {
       var header = token.split(' ');
       token = header[1];
     }
     return token;
   },
   checkToken : function(token) {
+    let self = this;
     return new Promise(function(resolve,reject) {
-      
       token = self.splitToken(token);
       if (token == null) {
         return reject('Token is required!');
@@ -70,8 +71,7 @@ module.exports = Proto.extend({
       // --------------------------------------
       JsonWebToken.verify(token, config.app.app_secret, function(err, decoded) {
         if (err!=null) {
-          reject(err);
-          return;
+          return reject(new CustomError("error.token_invalid",err.message));
         }
         resolve(decoded);
       });
@@ -98,16 +98,16 @@ module.exports = Proto.extend({
       let now = new Date();
       let newExpired = now.getTime() + self.expiredConst;
       let newDateTime = (await self.timestampToDatetime(newExpired)) + "";
-      //Object.assign({}, data)
+      // Object.assign({}, data)
       //TODO: masukan data yang benar ke JWT sign dan cek token yang dibuat pada saat registrasi
-      let token = jwt.sign(data, config.app.app_secret, {
+      let token = JsonWebToken.sign(data, config.app.app_secret, {
         expiresIn: (self.expiredConst / 1000) + "s"
       });
       let encrypteToken = await self.generatePassword(token,function(err){
         if(err != null) return reject(err);
       })
       // console.log('expiredConst',encrypteToken);
-      let refresh_token = jwt.sign({
+      let refresh_token = JsonWebToken.sign({
         token : token,
       }, config.app.app_secret, {
         expiresIn: (self.expiredRefreshToken / 1000) + "s"
@@ -126,14 +126,95 @@ module.exports = Proto.extend({
       if(decodeRefreshTOken.status == 'rejected'){
         return resolve(decodeRefreshTOken);
       }
-      let valid = await self.checkPassword(props.token,decodeRefreshTOken.token,function(err){
-        reject('Cant decrypte the token')
-      })
+      let valid = await self.checkPassword(props.token,decodeRefreshTOken.token)
       if(valid){
         let decodeToken = await self.checkToken(props.token);
         return resolve(decodeToken)
       }
       reject('You cant renew the token');
     })
+  },
+  /* Authentication like laravel  */
+  _auth : Object.freeze(config.auth),
+  _select_auth : null,
+  getSelectAuth : async function(authName,req){
+    let self = this;
+    try{
+      let user = await self._getGuard(authName,req);
+      return user;
+    }catch(ex){
+      throw ex;
+    }
+  },
+  setDefaultGuard : function(guardName,req){
+    this._select_auth = guardName;
+    this._req = req;
+  },
+  getAuth : async function(){
+    let self = this;
+    try{
+      if(self._select_auth == null) {
+        throw new CustomError("error.select_auth_exception",'Please set default auth first');
+      }
+      let user = await self._getGuard(self._select_auth,self._req);
+      return user;
+    }catch(ex){
+      throw ex;
+    }
+  },
+  _getGuard : async function(guardName,req){
+    try{
+      let self = this;
+      let guard = self._auth.guard[guardName];
+      let provider = null;
+      if(guard == null){
+        throw new CustomError('error.guard_not_found_exception','This guard '+guardName+' is not defined!');
+      }
+      switch(guard.driver){
+        case 'session':
+          provider = await self._getProvider(guard.provider);
+          break;
+        case 'jwt':
+          let token = await self.checkToken(req.headers.authorization);
+          provider = await self._getProvider(guard.provider,{
+            id : token.id,
+            email : token.email
+          });
+          return provider;
+        case 'token':
+          provider = await self._getProvider(guard.provider);
+          break;
+      }
+    }catch(ex){
+      throw ex;
+    }
+  },
+  _getProvider : async function(providerName,props){
+    try{
+      staticType(props,[Object]);
+      let self = this;
+      let provider = self._auth.provider[providerName];
+      let user = null;
+      if(provider == null){
+        throw new CustomError('error.provider_not_found_exception','This provider '+providerName+' is not defined')
+      }
+      switch(provider.driver){
+        case 'sequelize':
+          staticType(props.id,[Number]);
+          staticType(props.email,[String]);
+          user = provider.model;
+          user = user.create();
+          user = await user.first({
+            where : { id : props.id, email : props.email }
+          })
+          return user;
+        case 'mongodb':
+          break;
+        default:
+          break;
+      }
+    }catch(ex){
+      throw ex;
+    }
   }
 })

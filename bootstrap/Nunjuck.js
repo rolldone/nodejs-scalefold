@@ -15,7 +15,7 @@ module.exports = async function(callback){
     // template_cache = template_cache.value;
   }
   console.log('Template Cache is ',template_cache);
-  var envNunjucks = Nunjucks.configure([Path.join(__dirname, "../", "resources/"), Path.join(__dirname, "../", "resources/v1/")], {
+  var envNunjucks = Nunjucks.configure([Path.join(__dirname, "../", "resources/"), Path.join(__dirname, "../", "resources/views/")], {
     autoescape: true,
     express: App,
     watch: true,
@@ -100,5 +100,5 @@ module.exports = async function(callback){
     };
   }
   envNunjucks.addExtension("RequireExtention",new RequireExtention());
-  return callback(null);
+  return null;
 };

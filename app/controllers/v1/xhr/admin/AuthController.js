@@ -1,8 +1,8 @@
 const BaseController = require("../../../BaseController");
-const AuthMainService = require('@app/services/main/Auth.js');
+const Auth = require("../../../../services/main/AuthService");
 module.exports = BaseController.extend({
   returnAuthMainService : function(){
-    return AuthMainService.create();
+    return Auth.create();
   },
   basicLogin : function(req,res){
     let self = this;
@@ -22,14 +22,14 @@ module.exports = BaseController.extend({
       return self.responseErrorStatus(ex,res);
     }
   },
-  apiLogin : function(req,res){
+  apiLogin : async function(req,res){
     let self = this;
     try{
       let props = {};
       props.email = req.body.email;
       props.password = req.body.password;
       let resData = self.returnAuthMainService();
-      resData = resData.apiLogin(props);
+      resData = await resData.apiLogin(props);
       resData = {
         status : 'success',
         status_code : 200,
@@ -40,7 +40,7 @@ module.exports = BaseController.extend({
       return self.responseErrorStatus(ex,res);
     }
   },
-  register : function(req,res){
+  register : async function(req,res){
     let self = this;
     try{
       let props = {};
@@ -50,7 +50,7 @@ module.exports = BaseController.extend({
       props.password = req.body.password;
       props.password_confirm = req.body.password_confirm;
       let resData = self.returnAuthMainService();
-      resData = resData.register(props);
+      resData = await resData.register(props);
       resData = {
         status : 'success',
         status_code : 200,

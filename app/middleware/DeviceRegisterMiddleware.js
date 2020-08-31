@@ -1,5 +1,5 @@
 const BaseMiddleware = require("./BaseMiddleware");
-const DeviceService = require('@app/services/main/Device.js');
+const DeviceService = require("../services/main/DeviceService");
 module.exports = BaseMiddleware.extend({
   action : async function(req,res,next){
     let self = this;

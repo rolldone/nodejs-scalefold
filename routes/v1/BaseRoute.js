@@ -15,20 +15,31 @@ module.exports = Proto.extend({
   router : new Router(),
   app : null,
   baseRoute : '',
+  _path : null,
+  _middleware : [],
   onready : function(){
     console.log('onready - Override this function');
   },
+  // use : function(path,middleware=[],callbackRouter){
+  //   path = this.baseRoute+path;
+  //   callbackRouter(this);
+  //   this.app.use(path,middleware,this.childRouter);
+  // },
   use : function(path,middleware=[],callbackRouter){
-    console.log('callbackRouter',callbackRouter);
-    this.childRouter = callbackRouter(this.childRouter);
-    console.log('exRouter',this.childRouter)
-    // console.log('result',exRouter);
-    this.app.use(path,middleware,this.childRouter);
+    this._path = path;
+    this._middleware = middleware;
+    callbackRouter(this);
+
   },
   set : function(action,...props){
-    props[0]=this.baseRoute+props[0];
+    props[0]=this.baseRoute+(this._path||'')+props[0];
     console.log('action',action);
     console.log('props',props);
+    console.log('_path',this._path);
+    props[2] = [
+      this._middleware,
+      ...props[2]
+    ]
     this.app[action].call(this.app,...props);
   },
   get : function(...props){

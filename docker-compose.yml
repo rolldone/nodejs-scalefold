@@ -1,0 +1,38 @@
+version: "3.8"
+networks:
+  own_net:
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.28.0.0/16
+volumes: 
+  mysql_volume :
+    driver : local
+services:
+  web:
+    build: ./scaffold_nodejs
+    networks:
+      own_net:
+        ipv4_address: 172.28.1.2
+    command : >
+      bash -c "
+        ./wait-for-it.sh host.docker.internal:3306 &&
+        npm install &&
+        sequelize db:migrate && 
+        nodemon index.js"
+    image : scaffold_nodejs
+    working_dir : '/opt/app'
+    hostname: myappserver
+    ports: 
+      - "1081:8084"
+    volumes:
+      - ".:/opt/app"
+      #- "./node_modules:/opt/app/node_modules"
+    #depends_on:
+      #- redis
+      #- mysql
+    #links : 
+      #- redis
+      #- mysql
+
+  
