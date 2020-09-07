@@ -11,6 +11,9 @@ const BussineParameter = require('../../app/controllers/v1/xhr/admin/BussinePara
 const JobController = require('../../app/controllers/v1/xhr/member/JobController');
 const ScheduleController = require('../../app/controllers/v1/xhr/member/ScheduleController');
 const QueueRecordController = require('../../app/controllers/v1/xhr/member/QueueRecordController');
+const ProductController = require('../../app/controllers/v1/xhr/admin/ProductController');
+const CheckDeviceIdMiddleware = require('../../app/middleware/CheckDeviceIdMiddleware');
+const OrderController = require('../../app/controllers/v1/xhr/member/OrderController');
 
 module.exports = BaseRoute.extend({
   baseRoute : '/api/v1',
@@ -35,14 +38,36 @@ module.exports = BaseRoute.extend({
       self.post('/bus-param/add','api.admin.bus_param.add',[],(BussineParameter.create()).addBusParam);
       self.post('/bus-param/update','api.admin.bus_param.update',[],(BussineParameter.create()).updateBusParam);
       self.post('/bus-param/delete','api.admin.bus_param.delete',[],(BussineParameter.create()).deleteBusParam);
+      /* Product & Product Item */
+      self.get('/product/products','api.admin.product.products',[],(ProductController.create()).getProducts);
+      self.get('/product/:id/view','api.admin.product.product',[],(ProductController.create()).getProduct);
+      self.post('/product/add','api.admin.product.add',[],(ProductController.create()).addProduct);
+      self.post('/product/update','api.admin.product.update',[],(ProductController.create()).updateProduct);
+      self.post('/product/delete','api.admin.product.delete',[],(ProductController.create()).deleteProduct);
+      self.get('/product/item/app-categories','api.admin.product.item.app_categories',[],(ProductController.create()).getAppCategories);
+      self.get('/product/item/items','api.admin.product.item.items',[],(ProductController.create()).getProductItems);
+      self.get('/product/item/:id/view','api.admin.product.item.item',[],(ProductController.create()).getProductItem);
+      self.post('/product/item/add','api.admin.product.item.add',[],(ProductController.create()).addProductItem);
+      self.post('/product/item/update','api.admin.product.item.update',[],(ProductController.create()).updateProductItem);
+      self.post('/product/item/delete','api.admin.product.item.delete',[],(ProductController.create()).deleteProductItem);
     });
     /* Client */
     self.use('/member',[],function(){
       self.post('/auth/login','api.member.auth.login',[],(AuthControllerMember.create()).apiLogin);
       self.post('/auth/register','api.member.auth.register',[],(AuthControllerMember.create()).register);
       self.get('/auth/logout','api.member.auth.logout',[],(AuthControllerMember.create()).logout);
+      self.get('/auth/register-device-id','api.member.auth.register_device_id',[],(AuthControllerMember.create()).registerDeviceID);
     })
-    self.use('/member',[(SetDefaultDriver.create()).setValue('member_api'),(ApiAuthMiddleware.create()).setValue('member_api')],function(){
+
+    /* Client cart */
+    self.use('/member',[(CheckDeviceIdMiddleware.create()).action],function(){
+      self.get('/cart/carts','api.member.cart.carts',[],(OrderController.create()).getCarts);
+      self.get('/cart/:id/view','api.member.cart.cart',[],(OrderController.create()).getCart);
+      self.get('/cart/add','api.member.cart.add',[],(OrderController.create()).addCart);
+      self.get('/cart/delete','api.member.cart.delete',[],(OrderController.create()).deleteCart);
+    })
+
+    self.use('/member',[(CheckDeviceIdMiddleware.create()).action,(SetDefaultDriver.create()).setValue('member_api'),(ApiAuthMiddleware.create()).setValue('member_api')],function(){
       /* Member User */
       self.get('/user/profile','api.member.user.profile',[],(UserControllerMember.create()).profile);
       /* Apps */
@@ -66,6 +91,12 @@ module.exports = BaseRoute.extend({
       /* QueueRecords */
       self.get('/queue-record/queue-records','api.member.queue_record.queue_records',[],(QueueRecordController.create()).getQueueRecords);
       self.get('/queue-record/:id/view','api.member.queue_record.queue_record',[],(QueueRecordController.create()).getQueueRecord);
+      /* Order */
+      self.get('/order/orders','api.member.order.orders',[],(OrderController.create()).getOrders);
+      self.get('/order/:id/view','api.member.order.order',[],(OrderController.create()).getOrder);
+      self.post('/order/add','api.member.order.add',[],(OrderController.create()).addOrder);
+      self.post('/order/submit','api.member.order.submit',[],(OrderController.create()).submitOrder);
+      self.post('/order/cancel','api.member.order.cancel',[],(OrderController.create()).cancelOrder);
     })
   }
 })

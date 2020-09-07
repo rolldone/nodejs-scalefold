@@ -1,104 +1,116 @@
 const BaseService = require("../BaseService");
+const ClientApp = require('../../ClientApp.js');
 const BusParam = require("../../BusParam");
-
 module.exports = BaseService.extend({
+  returnClientApp : function(){
+    return ClientApp.create();
+  },
   returnBusParam : function(){
     return BusParam.create();
   },
-  getBusParams : async function(props){
+  getClientApps : async function(props){
     let self = this;
     try{
       let validator = self.returnValidator(props,{
-        take : 'required|numeric',
-        page : 'required|numeric',
+        take : 'required',
+        page : 'required',
       });
       switch(await validator.check()){
         case validator.fails:
           throw new CustomError('error.validation',JSON.stringify(validator.errors.errors));
       }
-      let busparam = this.returnBusParam();
-      let resData = await busparam.get({
+      let clientapp = self.returnClientApp();
+      let resData = await clientapp.get({
+        offset : props.take * props.page,
+        limit : props.take,
         where : (function(){
           let where = {};
-          if(props.bussinee_parameter_category_key != null){
-            where.bussinee_parameter_category_key = props.bussinee_parameter_category_key
+          if(props.user_id != null){
+            where.user_id = props.user_id;
           }
           return where;
         })(),
-        offset : props.take * props.page,
-        limit : props.take,
+        include: [{
+          model: self.returnBusParam().model,
+          as: 'bus_param',
+        }],
       });
       return resData;
     }catch(ex){
       throw ex;
     }
   },
-  getBusParam : async function(id){
-    let self = this;
-    try{
-      let validator = self.returnValidator({
-        id : id
-      },{
-        id : 'required',
-      });
-      switch(await validator.check()){
-        case validator.fails:
-          throw new CustomError('error.validation',JSON.stringify(validator.errors.errors));
-      }
-      let busparam = this.returnBusParam();
-      let resData = await busparam.first({
-        where : {
-          id : id
-        },
-      });
-      return resData;
-    }catch(ex){
-      throw ex;
-    }
-  },
-  addBusParam : async function(props){
+  getClientApp : async function(props){
     let self = this;
     try{
       let validator = self.returnValidator(props,{
-        key : 'required',
-        description : 'required',
-        status : 'required',
-        bussinee_parameter_category_key : 'required',
+        id : 'required'
       });
       switch(await validator.check()){
         case validator.fails:
           throw new CustomError('error.validation',JSON.stringify(validator.errors.errors));
       }
-      let busparam = self.returnBusParam();
-      let resData = await busparam.save(props);
+      let clientapp = self.returnClientApp();
+      let resData = await clientapp.first({
+        where : (function(){
+          let where = {
+            id : props.id
+          };
+          if(props.user_id != null){
+            where.user_id = props.user_id;
+          }
+          return where;
+        })()
+      });
       return resData;
     }catch(ex){
       throw ex;
     }
   },
-  updateBusParam : async function(props){
+  addClientApp : async function(props){
+    let self = this;
+    try{
+      let validator = self.returnValidator(props,{
+        user_id : 'required',
+        buss_param_id : 'required',
+        name : 'required',
+        limit : 'required',
+        status : 'required'
+      });
+      switch(await validator.check()){
+        case validator.fails:
+          throw new CustomError('error.validation',JSON.stringify(validator.errors.errors));
+      }
+      let clientapp = self.returnClientApp();
+      let resData = await clientapp.save(props);
+      return resData;
+    }catch(ex){
+      throw ex;
+    }
+  },
+  updateClientApp : async function(props){
     let self = this;
     try{
       let validator = self.returnValidator(props,{
         id : 'required',
-        key : 'required',
-        // value : 'required',
-        description : 'required',
-        status : 'required',
-        bussinee_parameter_category_key : 'required',
+        user_id : 'required',
+        buss_param_id : 'required',
+        name : 'required',
+        limit : 'required',
+        status : 'required'
       });
       switch(await validator.check()){
         case validator.fails:
           throw new CustomError('error.validation',JSON.stringify(validator.errors.errors));
       }
-      let busparam = self.returnBusParam();
-      let resData = await busparam.update(props);
+      let clientapp = self.returnClientApp();
+      let resData = await clientapp.update(props);
       return resData;
     }catch(ex){
       throw ex;
     }
   },
-  deleteBusParam : async function(props){
+  deleteClientApp : async function(props){
     staticType(props,[Object]);
     staticType(props.ids,[String]);
     staticType(props.force_delete,[null,Boolean]);
@@ -111,24 +123,20 @@ module.exports = BaseService.extend({
         case validator.fails:
           throw new CustomError('error.validation',JSON.stringify(validator.errors.errors));
       }
-      let ids = JSON.parse(props.ids);
-      let busparam = self.returnBusParam();
-      let resData = await busparam.delete({
-        where : {
-          id : ids
-        },
+      ids = JSON.parse(ids);
+      let clientapp = self.returnClientApp();
+      let resData = await clientapp.delete({
+        where : (function(){
+          let where = {
+            id : ids
+          };
+          if(props.user_id != null){
+            where.user_id = props.user_id;
+          }
+          return where;
+        })(),
         force : props.force_delete || false
       });
-      return resData;
-    }catch(ex){
-      throw ex;
-    }
-  },
-  getStaticCategories : async function(){
-    let self = this;
-    try{
-      let busparam = self.returnBusParam();
-      let resData = await busparam.category;
       return resData;
     }catch(ex){
       throw ex;

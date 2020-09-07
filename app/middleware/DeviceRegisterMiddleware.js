@@ -10,14 +10,13 @@ module.exports = BaseMiddleware.extend({
           break;
         default:
           let device = DeviceService.create();
-          console.log('device',device);
-          let resData = await device.getDeviceByToken(req.sessionID)
+          let resData = await device.getDeviceByDeviceID(req.sessionID)
           if(resData == null){
             await device.addDevice({
               browser_type : req.headers['user-agent'],
               ip_address : req.header('x-forwarded-for') || req.connection.remoteAddress,
               status : device.status.NEW,
-              token : req.sessionID
+              device_id : req.sessionID
             });
           }
           next();

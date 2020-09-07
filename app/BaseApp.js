@@ -4,7 +4,7 @@ module.exports = Proto.extend({
   model : null,
   _includes : [],
   _excludes : [],
-  _raw : true ,
+  _raw : false ,
   _nest : true,
   getRaw : function(){
     return this.raw || this._raw;

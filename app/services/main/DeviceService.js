@@ -30,18 +30,18 @@ module.exports = BaseService.extend({
       throw ex;
     }
   },
-  getDeviceByToken : async function(token){
+  getDeviceByDeviceID : async function(device_id){
     let self = this;
     try{
       let validator = self.returnValidator({
-        token : token
+        device_id : device_id
       },{
-        token : 'required'
+        device_id : 'required'
       });
       switch(await validator.check()){
         case validator.passes:
           return this.getDevice({
-            token : token
+            device_id : device_id
           })
         case validator.fails:
           throw new CustomError("error.validation",JSON.stringify(validator.errors.all()));
@@ -72,7 +72,7 @@ module.exports = BaseService.extend({
     let self = this;
     try{
       let validator = self.returnValidator(props,{
-        token : 'required',
+        device_id : 'required',
         ip_address : 'required',
         browser_type : 'required',
         status : 'required'

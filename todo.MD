@@ -37,6 +37,7 @@
     - nama paket
     - harga
   - table product item
-    - app_category_id => bus_param
-    - limit
-    - 
+    - deskripsi : Kumpulan barang yang di kemas untuk product
+    - field :
+      - app_category_id => bus_param
+      - limit 

@@ -2,7 +2,7 @@
 module.exports = (sequelize, DataTypes) => {
   const Devuce = sequelize.define('Device', {
     browser_type: DataTypes.TEXT,
-    token: DataTypes.TEXT,
+    device_id: DataTypes.TEXT,
     ip_address: DataTypes.STRING,
     from_device_id : DataTypes.INTEGER,
     expired_at: DataTypes.DATE,

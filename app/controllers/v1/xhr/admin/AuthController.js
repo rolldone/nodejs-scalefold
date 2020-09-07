@@ -1,6 +1,10 @@
 const BaseController = require("../../../BaseController");
 const Auth = require("../../../../services/main/AuthService");
+const DeviceService = require("../../../../services/main/DeviceService");
 module.exports = BaseController.extend({
+  returnDeviceService : function(){
+    return DeviceService.create();
+  },
   returnAuthMainService : function(){
     return Auth.create();
   },

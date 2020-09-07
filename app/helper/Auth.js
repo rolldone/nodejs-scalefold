@@ -2,6 +2,7 @@ const Proto = require('uberproto');
 const { JsonWebToken, Bcrypt } = require('@tool'); 
 const config = require('@config');
 const { Lodash } = require('../../tool');
+const DeviceService = require('../services/main/DeviceService');
 const saltRounds = 10;
 
 module.exports = Proto.extend({
@@ -216,5 +217,68 @@ module.exports = Proto.extend({
     }catch(ex){
       throw ex;
     }
-  }
+  },
+  /* 
+    Get Device ID
+  */
+  _device : null,
+  setDefaultRequest : function(req){
+    let self = this;
+    self._req = req;
+  },
+  getDevice : async function(){
+    let self = this;
+    return await (async function(){
+      let device = DeviceService.create();
+      let resData = await device.getDeviceByDeviceID(self._req.headers.device_id);
+      if(resData == null){
+        return null;
+      }
+      self._device = resData;
+      return self._device;
+    })()
+  },
+  getDeviceID : async function(){
+    let self = this;
+    return await (async function(){
+      let device = DeviceService.create();
+      console.log('self._req.headers.device_id',self._req.headers.device_id)
+      let resData = await device.getDeviceByDeviceID(self._req.headers.device_id);
+      if(resData == null){
+        return null;
+      }
+      self._device = resData;
+      return self._device.device_id;
+    })()
+  },
+  setDeviceID : async function(req){
+    let self = this;
+    self._req = req;
+    return await self._generateDeviceID(self._req);
+  },
+  _generateUniqueID : function(){
+    return '_' + Math.random().toString(36).substr(2, 9);
+  },
+  _generateDeviceID : async function(req){
+    let self = this;
+    let device = DeviceService.create();
+    let resData = await (async function(){
+      let resData = null;
+      if(req.headers.device_id != null && req.headers.device_id != ''){
+        resData = await device.getDeviceByDeviceID(req.headers.device_id);
+      }
+      return resData;
+    })()
+    
+    if(resData == null){
+      resData = await device.addDevice({
+        browser_type : req.headers['user-agent'],
+        ip_address : req.header('x-forwarded-for') || req.connection.remoteAddress,
+        status : device.status.NEW,
+        device_id : self._generateUniqueID()
+      })
+    }
+    self._device = resData;
+    return resData;
+  },
 })
