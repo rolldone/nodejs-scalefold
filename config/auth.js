@@ -9,15 +9,18 @@ module.exports = {
     },
     api : {
       driver : 'jwt',
-      provider : 'users'
+      provider : 'users',
+      key : 'apakah ini untuk user?'
     },
     member_api : {
       driver : 'jwt',
-      provider : 'clients'
+      provider : 'clients',
+      key : 'apakah ini untuk member?'
     },
     app : {
       driver : 'jwt',
-      provider : 'apps'
+      provider : 'apps',
+      key : 'apakah ini untuk app?'
     }
   },
   provider : {

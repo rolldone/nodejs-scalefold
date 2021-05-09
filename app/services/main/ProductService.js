@@ -141,7 +141,12 @@ module.exports = BaseService.extend({
           throw new CustomError('error.validation',JSON.stringify(validator.errors.all()));
       }
       let productItem = self.returnProductItemApp();
-      let resData = productItem.get({});
+      let resData = productItem.get({
+        include : [{
+          model : self.returnBusParamApp().model,
+          as : 'app_category'
+        }]
+      });
       return resData;
     }catch(ex){
       throw ex;

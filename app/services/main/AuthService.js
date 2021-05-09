@@ -1,7 +1,10 @@
 const BaseService = require('../BaseService.js');
 const User = require('../../User.js');
-
+const config = require('@config');
 module.exports = BaseService.extend({
+  getAuthConfig : function(){
+    return config.auth.guard.api;
+  },
   returnUserApp : function(){
     return User.create();
   },
@@ -44,11 +47,10 @@ module.exports = BaseService.extend({
           if(resData == false){
             throw new CustomError("error.authentication_exception","Email or Password is not match!");
           }
-          let token = GAuth.generateToken({
+          let token = GAuth.generateToken(self.getAuthConfig(),{
             id : user.id,
             email : user.email,
-
-          })
+          });
           return token;
         case validator.fails:
           throw new CustomError('error.validation',JSON.stringify(validator.errors.errors));
@@ -80,6 +82,9 @@ module.exports = BaseService.extend({
     }catch(ex){
       throw ex;
     }
+  },
+  getUniqueKey : function(){
+    return 'auth.main'
   },
   logout : function(){}
 })

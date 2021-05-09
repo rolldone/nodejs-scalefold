@@ -59,8 +59,10 @@ module.exports = Proto.extend({
     }
     return token;
   },
-  checkToken : function(token) {
+  checkToken : function(key,token) {
     let self = this;
+    staticType(key,[String]);
+    staticType(token,[String]);
     return new Promise(function(resolve,reject) {
       token = self.splitToken(token);
       if (token == null) {
@@ -70,7 +72,7 @@ module.exports = Proto.extend({
       // ----------------------------
       // Decrypte tokennya terlebih dahulu
       // --------------------------------------
-      JsonWebToken.verify(token, config.app.app_secret, function(err, decoded) {
+      JsonWebToken.verify(token, key, function(err, decoded) {
         if (err!=null) {
           return reject(new CustomError("error.token_invalid",err.message));
         }
@@ -93,15 +95,20 @@ module.exports = Proto.extend({
       throw ex;
     }
   },
-  generateToken : function(data) {
+  generateToken : function(authConfig,data) {
     let self = this;
+    staticType(authConfig,[Object]);
+    staticType(authConfig.key,[String]);
+    staticType(authConfig.driver,[String]);
+    staticType(authConfig.provider,[String]);
+    staticType(data,[Object]);
     return new Promise(async function(resolve,reject) {
       let now = new Date();
       let newExpired = now.getTime() + self.expiredConst;
       let newDateTime = (await self.timestampToDatetime(newExpired)) + "";
       // Object.assign({}, data)
       //TODO: masukan data yang benar ke JWT sign dan cek token yang dibuat pada saat registrasi
-      let token = JsonWebToken.sign(data, config.app.app_secret, {
+      let token = JsonWebToken.sign(data, authConfig.key, {
         expiresIn: (self.expiredConst / 1000) + "s"
       });
       let encrypteToken = await self.generatePassword(token,function(err){
@@ -119,20 +126,6 @@ module.exports = Proto.extend({
         refresh_token: refresh_token,
         expired_at: newDateTime
       });
-    })
-  },
-  reGenerateTokenWithoutLogin : function(props){
-    return new Promise(async function(resolve,reject){
-      let decodeRefreshTOken = await self.checkToken(props.refresh_token);
-      if(decodeRefreshTOken.status == 'rejected'){
-        return resolve(decodeRefreshTOken);
-      }
-      let valid = await self.checkPassword(props.token,decodeRefreshTOken.token)
-      if(valid){
-        let decodeToken = await self.checkToken(props.token);
-        return resolve(decodeToken)
-      }
-      reject('You cant renew the token');
     })
   },
   /* Authentication like laravel  */
@@ -176,7 +169,7 @@ module.exports = Proto.extend({
           provider = await self._getProvider(guard.provider);
           break;
         case 'jwt':
-          let token = await self.checkToken(req.headers.authorization);
+          let token = await self.checkToken(guard.key,req.headers.authorization);
           provider = await self._getProvider(guard.provider,{
             id : token.id,
             email : token.email
